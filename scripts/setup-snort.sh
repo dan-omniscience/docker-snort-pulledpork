@@ -10,6 +10,7 @@ mkdir -p /etc/snort \
 touch /etc/snort/rules/iplists/black_list.rules \
     && touch /etc/snort/rules/iplists/white_list.rules \
     && touch /etc/snort/rules/local.rules \
+    && touch /etc/snort/rules/snort.rules \
     && touch /etc/snort/sid-msg.map
 # Create our logging directories:
 mkdir -p /var/log/snort/archived_logs
@@ -38,4 +39,5 @@ sed -i "s/include \$RULE\_PATH/#include \$RULE\_PATH/" /etc/snort/snort.conf \
     && sed -i "s/var WHITE_LIST_PATH \.\.\/rules/var WHITE_LIST_PATH \/etc\/snort\/rules\/iplists/" /etc/snort/snort.conf \
     && sed -i "s/var BLACK_LIST_PATH \.\.\/rules/var BLACK_LIST_PATH \/etc\/snort\/rules\/iplists/" /etc/snort/snort.conf \
     && sed -i "s/#include \$RULE_PATH\/local\.rules/include \$RULE_PATH\/local\.rules/" /etc/snort/snort.conf \
-    && sed -i '522ioutput unified2: filename snort.u2, limit 128' /etc/snort/snort.conf
+    && sed -i '522ioutput unified2: filename snort.u2, limit 128' /etc/snort/snort.conf \
+    && sed -i '548iinclude $RULE_PATH/snort.rules' /etc/snort/snort.conf

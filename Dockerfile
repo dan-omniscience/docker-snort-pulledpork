@@ -24,6 +24,9 @@ RUN apt-get update && \
     openssl \
     libssl-dev \
     libnghttp2-dev \
+    libcrypt-ssleay-perl \
+    liblwp-useragent-determined-perl \
+    cron \
     vim
 
 ENV DAQ_VERSION 2.0.6
@@ -42,6 +45,12 @@ RUN wget https://www.snort.org/downloads/snort/snort-${SNORT_VERSION}.tar.gz \
     && cd snort-${SNORT_VERSION} \
     && ./configure --enable-sourcefire; make; make install
 
+RUN wget https://github.com/shirkdog/pulledpork/archive/master.tar.gz -O pulledpork-master.tar.gz \
+    && tar xzvf pulledpork-master.tar.gz \
+    && cd pulledpork-master/ \
+    && cp pulledpork.pl /usr/local/bin \
+    && chmod +x /usr/local/bin/pulledpork.pl
+    
 RUN ldconfig
 
 RUN ln -s /usr/local/bin/snort /usr/sbin/snort
@@ -56,13 +65,11 @@ RUN mkdir /usr/local/lib/snort_dynamicrules
 
 # Clean up APT when done.
 RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
-    /opt/snort-${SNORT_VERSION}.tar.gz /opt/daq-${DAQ_VERSION}.tar.gz
+    /opt/snort-${SNORT_VERSION}.tar.gz /opt/daq-${DAQ_VERSION}.tar.gz /opt/pulledpork-master.tar.gz
 
 ADD etc/snort /etc/snort
 ADD log/snort /var/log/snort
 
-RUN /opt/scripts/setup-snort.sh
+RUN echo "31 03 * * * /usr/local/bin/pulledpork.pl -c /etc/snort/pulledpork.conf -l" >> /var/spool/cron/root
 
-ENV NETWORK_INTERFACE wlp4s0
-
-ENTRYPOINT ["/usr/sbin/snort", "-u", "snort", "-g", "snort", "-c", "/etc/snort/snort.conf"]
+ENTRYPOINT ["/opt/scripts/entrypoint.sh"]
