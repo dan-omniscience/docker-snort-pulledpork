@@ -9,4 +9,4 @@ fi
 
 cron
 
-exec "$@"
+exec /usr/sbin/snort -u snort -g snort -c /etc/snort/snort.conf "$@"
